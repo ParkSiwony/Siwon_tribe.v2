@@ -22,7 +22,7 @@ def stim():
 
 
 def test_stimuli_are_balanced(stim):
-    assert set(stim.primes) == {"MS", "PAIN", "LT", "ET", "NEU"}
+    assert set(stim.primes) == {"MS", "MS_STRUCT", "PAIN", "DISTRESS", "NONFINAL", "LT", "ET", "NEU"}
     assert len({len(v) for v in stim.primes.values()}) == 1
     assert len({len(v) for v in stim.probes.values()}) == 1
 
@@ -45,7 +45,7 @@ def test_probes_avoid_manipulation_vocabulary(stim):
 
 def test_latin_design_yokes_probes_across_conditions(stim):
     trials = stimuli.build_design(stim)
-    assert len(trials) == 5 * 4 * 2
+    assert len(trials) == 8 * 4 * 2
     by_key = {}
     for t in trials:
         probes = tuple(s.text for s in t.segments if s.kind == "probe")
@@ -73,7 +73,7 @@ def test_delayed_trials_contain_filler(stim):
 
 def test_full_crossing(stim):
     trials = stimuli.build_design(stim, crossing="full", delays=["immediate"])
-    assert len(trials) == 5 * 4 * 4
+    assert len(trials) == 8 * 4 * 4
 
 
 def test_design_roundtrip(stim, tmp_path):
@@ -98,3 +98,13 @@ def test_render_trial_onsets_and_identical_probe_audio(stim, tmp_path):
     # same probe text -> same cached waveform
     text = tab[tab.kind == "probe"].text.iloc[0]
     assert np.array_equal(cache.get(text), cache.get(text))
+
+
+def test_finality_vocabulary_only_in_finality_primes(stim):
+    """NONFINAL and DISTRESS must not smuggle in endings (cf. self_nonfinal)."""
+    finality = {"death", "die", "dying", "dead", "last", "end", "ending", "final", "forever",
+                "gone", "extinct", "funeral", "grave", "buried", "decay"}
+    for cond in ("NONFINAL", "DISTRESS", "PAIN", "NEU"):
+        for item in stim.primes[cond]:
+            words = set(re.findall(r"[a-z]+", item["text"].lower()))
+            assert not words & finality, (cond, item["id"], words & finality)

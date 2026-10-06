@@ -37,11 +37,12 @@ LOGGER = logging.getLogger(__name__)
 
 DEFAULT_PAIRS = (
     ("MS", "PAIN"),  # existential vs merely aversive threat (TMT's canonical contrast)
-    ("MS", "NEU"),
+    ("MS", "NONFINAL"),  # is finality needed, or is self/body focus enough?
+    ("MS", "DISTRESS"),  # is it finality, or first-person negative affect?
+    ("MS_STRUCT", "PAIN"),  # impersonal finality
+    ("MS", "MS_STRUCT"),  # does the self-reference matter?
     ("PAIN", "NEU"),  # sanity check: aversive imagery vs neutral
     ("LT", "ET"),  # limited vs expansive future time (SST's canonical contrast)
-    ("LT", "NEU"),
-    ("MS", "LT"),  # is mortality salience just an extreme case of limited time?
 )
 
 
@@ -56,6 +57,12 @@ class AnalysisConfig:
     extra: float = 1.0  # window method only: seconds added after the segment offset
     pairs: tp.Sequence[tuple[str, str]] = DEFAULT_PAIRS
     control_category: str = "NEUT"
+    # Extra category-vs-category interactions, e.g. (("WV_NORM", "WV_EXCL"),):
+    # does the prime shift one worldview axis more than the other?
+    category_contrasts: tp.Sequence[tuple[str, str]] = ()
+    # Pairs of contrasts whose probe-shift maps are correlated (exploratory),
+    # e.g. (("MS-PAIN", "MS_STRUCT-PAIN"),): self vs impersonal finality.
+    convergence: tp.Sequence[tuple[str, str]] = ()
     n_perm: int = 5000
     seed: int = 0
     # Confirmatory tests, fixed before looking at predictions (see configs/default.yaml).
@@ -321,11 +328,13 @@ def probe_modulation(meta, resp, rois, cfg: AnalysisConfig):
                              contrast=f"{a}-{b}", delay=delay, category=cat)
             tab["p_fwe_items"] = sign_flip_test(item_diff_roi[item_cats == cat], cfg.n_perm, cfg.seed)["p_fwe"]
             tables.append(tab)
-            if cat != cfg.control_category and cfg.control_category in cats:
-                ctrl = diff_roi[cats == cfg.control_category]
-                st = label_permutation_test(d, ctrl, cfg.n_perm, cfg.seed)
-                inter.append(_roi_table(st, names, contrast=f"{a}-{b}", delay=delay,
-                                        category=f"{cat}-vs-{cfg.control_category}"))
+        cat_pairs = [(c, cfg.control_category) for c in sorted(set(cats)) if c != cfg.control_category]
+        cat_pairs += [tuple(cp) for cp in cfg.category_contrasts]
+        for c1, c2 in cat_pairs:
+            if c1 not in cats or c2 not in cats:
+                continue
+            st = label_permutation_test(diff_roi[cats == c1], diff_roi[cats == c2], cfg.n_perm, cfg.seed)
+            inter.append(_roi_table(st, names, contrast=f"{a}-{b}", delay=delay, category=f"{c1}-vs-{c2}"))
     tab = pd.concat(tables, ignore_index=True)
     tab["q_fdr"] = bh_fdr(tab.p_unc)  # across everything tested, as a global guard
     inter_tab = pd.concat(inter, ignore_index=True) if inter else pd.DataFrame()
@@ -412,7 +421,8 @@ def holm(p: np.ndarray) -> np.ndarray:
 
 def test_hypotheses(results: dict[str, pd.DataFrame], hypotheses: tp.Sequence[dict]) -> pd.DataFrame:
     """Look up each pre-registered (table, contrast, delay, category, roi) test,
-    convert to a one-sided p in the predicted direction, Holm-correct."""
+    convert to a one-sided p in the predicted direction, and Holm-correct
+    within each hypothesis ``family`` (default: one family for all)."""
     rows = []
     for h in hypotheses:
         df = results[h["table"]]
@@ -426,14 +436,92 @@ def test_hypotheses(results: dict[str, pd.DataFrame], hypotheses: tp.Sequence[di
         est = r["diff"] if "diff" in r else r["mean"]
         sign = 1 if h.get("direction", "+") == "+" else -1
         p_one = r.p_unc / 2 if np.sign(est) == sign else 1 - r.p_unc / 2
-        rows.append(dict(name=h["name"], theory=h.get("theory", ""), test=h["table"], contrast=r.contrast,
+        rows.append(dict(name=h["name"], family=h.get("family", "all"), theory=h.get("theory", ""),
+                         test=h["table"], contrast=r.contrast,
                          delay=r.get("delay", ""), category=r.get("category", ""), roi=r.roi,
                          predicted=h.get("direction", "+"), effect=est, p_one_sided=p_one))
     df = pd.DataFrame(rows)
     if len(df):
-        df["p_holm"] = holm(df.p_one_sided)
+        df["p_holm"] = df.groupby("family").p_one_sided.transform(lambda p: holm(p.to_numpy()))
         df["supported"] = df.p_holm < 0.05
     return df
+
+
+def convergence(meta, resp, cfg: AnalysisConfig) -> pd.DataFrame:
+    """Do two contrasts re-shape the probes the same way? (exploratory)
+
+    Brain-level analogue of the item-profile convergence test of the LLM
+    steering study (self vs impersonal finality), with the same safeguards:
+
+    * Cross-half estimation (removes shared noise). A and B are estimated
+      from disjoint halves of the prime items; ``r_cross`` correlates A on
+      one half with B on the other, averaged over both assignments.
+    * Reliability. ``rel_a`` / ``rel_b`` are Spearman-Brown corrected
+      split-half reliabilities of each map (NaN when the half-correlation is
+      <= 0, i.e. the map is noise). Read r together with them.
+    * Reference (removes shared-baseline structure; the analogue of the
+      notebook's calibration curve). When A = X - Z and B = Y - Z share the
+      baseline Z, both maps contain "minus Z's own effect" and converge for
+      that reason alone. ``r_ref_max`` is the largest r_cross obtained by
+      replacing X with any other condition W (W - Z vs Y - Z). Convergence
+      beyond the shared baseline requires ``r_cross > r_ref_max``.
+    """
+    rows = []
+    conds = sorted(meta.prime_cond.unique())
+    for c1, c2 in cfg.convergence:
+        (x, z1), (y, z2) = (c.split("-", 1) for c in (c1, c2))
+        for delay in sorted(meta.delay.unique()):
+            sel = (meta.kind == "probe") & (meta.delay == delay)
+            try:
+                A, B = _item_maps(meta, resp, sel, x, z1), _item_maps(meta, resp, sel, y, z2)
+            except ValueError:
+                continue
+            refs = []
+            if z1 == z2:
+                for w in conds:
+                    if w not in (x, y, z1):
+                        try:
+                            refs.append((w, _item_maps(meta, resp, sel, w, z1)))
+                        except ValueError:
+                            pass
+            for cat in sorted(set(A) & set(B)):
+                rc, rel_a, rel_b = _cross_half(A[cat], B[cat])
+                ref = [_cross_half(R[cat], B[cat])[0] for _, R in refs if cat in R]
+                row = dict(contrast_a=c1, contrast_b=c2, delay=delay, category=cat,
+                           r_cross=rc, rel_a=rel_a, rel_b=rel_b)
+                if ref:
+                    row.update(r_ref_max=float(np.nanmax(ref)), r_ref_mean=float(np.nanmean(ref)),
+                               beyond_baseline=bool(rc > np.nanmax(ref)))
+                rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def _cross_half(da: dict[int, np.ndarray], db: dict[int, np.ndarray]) -> tuple[float, float, float]:
+    items = sorted(set(da) & set(db))
+    if len(items) < 2:
+        return np.nan, np.nan, np.nan
+    h1, h2 = items[: len(items) // 2], items[len(items) // 2:]
+
+    def m(d, h):
+        return np.mean([d[i] for i in h], 0)
+
+    def r(u, v):
+        return float(np.corrcoef(u, v)[0, 1])
+
+    def sb(x):
+        return 2 * x / (1 + x) if x > 0 else np.nan
+
+    r_cross = float(np.mean([r(m(da, h1), m(db, h2)), r(m(da, h2), m(db, h1))]))
+    return r_cross, sb(r(m(da, h1), m(da, h2))), sb(r(m(db, h1), m(db, h2)))
+
+
+def _item_maps(meta, resp, sel, a, b) -> dict[str, dict[int, np.ndarray]]:
+    """{category: {item_index: A-B map averaged over that item's probes}}."""
+    ra, rb, keys = _paired(meta, resp, sel, a, b, ["category", "item_index"])
+    out: dict[str, dict[int, np.ndarray]] = {}
+    for (cat, item), d in zip(keys, ra - rb):
+        out.setdefault(cat, {})[item] = d
+    return out
 
 
 def run_all(meta, resp, rois, cfg: AnalysisConfig, out_dir: str | Path) -> dict[str, pd.DataFrame]:
@@ -445,6 +533,7 @@ def run_all(meta, resp, rois, cfg: AnalysisConfig, out_dir: str | Path) -> dict[
         prime_contrasts=prime_tab, probe_modulation=probe_tab, probe_interaction=inter_tab,
         carryover=carryover(meta, resp, cfg), decoding=decode_prime(meta, resp, rois, cfg),
     )
+    results["convergence"] = convergence(meta, resp, cfg)
     results["hypotheses"] = test_hypotheses(results, cfg.hypotheses)
     for name, df in results.items():
         df.to_csv(out_dir / f"{name}.csv", index=False)
@@ -461,8 +550,8 @@ def summarize(results: dict[str, pd.DataFrame], alpha: float = 0.05) -> str:
              f"q_fdr < {alpha} (Benjamini-Hochberg across every test in the table).", ""]
     hyp = results.get("hypotheses", pd.DataFrame())
     if len(hyp):
-        lines += ["## 0. Pre-registered hypotheses (one-sided, Holm-corrected)", ""]
-        lines += _table(hyp[["name", "theory", "contrast", "delay", "category", "roi", "predicted",
+        lines += ["## 0. Pre-registered hypotheses (one-sided, Holm-corrected within family)", ""]
+        lines += _table(hyp[["name", "family", "theory", "contrast", "delay", "category", "roi", "predicted",
                              "effect", "p_one_sided", "p_holm", "supported"]])
         lines += ["", "Everything below is exploratory.", ""]
     pt = results["prime_contrasts"]
@@ -479,6 +568,10 @@ def summarize(results: dict[str, pd.DataFrame], alpha: float = 0.05) -> str:
     lines += _table(results["carryover"]) if len(results["carryover"]) else ["n/a"]
     lines += ["", "## 5. Decoding the prime from probe responses (chance = 0.5)", ""]
     lines += _table(results["decoding"]) if len(results["decoding"]) else ["n/a"]
+    conv = results.get("convergence", pd.DataFrame())
+    if len(conv):
+        lines += ["", "## 6. Convergence between contrasts (cross-half spatial r of probe-shift maps; descriptive)", ""]
+        lines += _table(conv)
     return "\n".join(lines) + "\n"
 
 

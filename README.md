@@ -29,17 +29,23 @@ the prime alone. "What does mortality salience induce?" becomes a measurable que
 **which kinds of content (worldview, self-worth, social bonds, savoring, achievement)
 does the prime make the brain respond to differently, and in which networks?**
 
-| Prime | Role |
-|---|---|
-| **MS** mortality salience | imagine your own death (adapted from the classic TMT prompt) |
-| **PAIN** dental pain | the canonical TMT control: equally aversive and vivid, but not existential |
-| **LT** limited time | the same life situations as ET, with a short time horizon |
-| **ET** expansive time | the matched control for LT |
-| **NEU** neutral routine | low-arousal baseline |
+The TMT primes mirror the vector sets of the companion LLM steering study
+(`Mortality_Steering_v7.ipynb`), so each brain-level contrast has an LLM-level twin:
+
+| Prime | Content | LLM twin | Role |
+|---|---|---|---|
+| **MS** | imagine your own death | `v_self` | target: first-person finality |
+| **MS_STRUCT** | irreversible endings of things/others (a felled tree, a dead star, an extinct bird) | `v_struct` | second target: impersonal finality |
+| **PAIN** | dental pain | `neg_sensory` | canonical TMT control: aversive, not existential |
+| **DISTRESS** | anxiety, shame, loneliness, anger: no ending | `neg_self` | first-person negative affect without finality |
+| **NONFINAL** | attending to your own body/self as it changes: no ending | `self_nonfinal` | self focus without finality |
+| **LT** / **ET** | the same situations with a short / long time horizon | — | Socioemotional Selectivity Theory |
+| **NEU** | neutral routine | — | low-arousal baseline |
 
 | Probe category | Prediction |
 |---|---|
-| **WV** cultural worldview | TMT: MS increases the response (worldview defense) |
+| **WV_NORM** in-group norm defense | TMT/LLM: MS increases the response |
+| **WV_EXCL** out-group exclusion | LLM: no finality-specific effect (kept separate from WV_NORM: the axes behaved differently, even oppositely, in the LLM study) |
 | **SELF** self-worth | TMT: MS increases the response (self-esteem buffer) |
 | **SOC** close relationships | SST: LT increases the response |
 | **SAV** present-moment savoring | SST: LT increases the response |
@@ -65,9 +71,21 @@ ROIs come from the HCP-MMP parcellation (the atlas used in the paper): salience
 (anterior insula/dACC), vmPFC, PCC/precuneus, TPJ, anterior temporal lobe, MTL,
 dlPFC, OFC, and a language control region. See `mortality_tribe/rois.py`.
 
-**Pre-registered hypotheses H1–H5** are listed in `configs/default.yaml`. They are
-tested one-sided with Holm correction. Fix them before running the real model;
-everything else counts as exploratory.
+**Pre-registered hypotheses** (`configs/default.yaml`) are one-sided and Holm-corrected within each family:
+
+| | Family | Prediction (immediate probes, vmPFC unless noted) | Source |
+|---|---|---|---|
+| H1 | TMT | MS − PAIN raises WV_NORM (vs NEUT) | LLM: `self_clean` steers in-group norm defense (+) |
+| H2 | TMT | MS − NONFINAL raises WV_NORM | LLM: `self_nonfinal` null → finality is necessary |
+| H3 | TMT | MS − DISTRESS raises WV_NORM | LLM: negative-affect controls moved the other way |
+| H4 | TMT | MS − PAIN shifts WV_NORM more than WV_EXCL | LLM: exclusion axis not finality-specific |
+| H5–H7 | SST | LT − ET: SOC ↑, SAV ↑ (OFC), ACH ↓ | Socioemotional Selectivity Theory |
+
+Steering activates the representation directly, which is closest to the *immediate* condition, so H1–H4 use immediate probes.
+The delayed condition is exploratory: the LoRA pilot suggests the sign may differ once mortality is no longer in focus.
+**Convergence** of self and impersonal finality (MS−PAIN vs MS_STRUCT−PAIN) is exploratory. It is computed cross-half
+(disjoint prime items), reported with split-half reliabilities, and compared against a shared-baseline reference
+(W−PAIN for every other condition W). This mirrors the notebook's attenuation correction and calibration curve.
 
 ## Install and run
 
@@ -87,7 +105,7 @@ python -m mortality_tribe predict   # TRIBE v2          -> outputs/preds/*.npz (
 python -m mortality_tribe analyze   # stats + figures   -> outputs/results/
 ```
 
-The default design has 5 primes × 4 items × 2 delays = 40 trials, about 2.3 hours of audio.
+The default design has 8 primes × 4 items × 2 delays = 64 trials, about 4 hours of audio.
 Start with `outputs/results/summary.md`. Next, check `figures/probe_timecourses.png`
 to confirm the predicted responses look hemodynamically sensible.
 
@@ -144,6 +162,14 @@ tests/              design invariants + end-to-end recovery of planted effects
 * TRIBE v2 is licensed CC-BY-NC-4.0 (non-commercial).
 
 ## Possible next steps
+
+* **Steer the brain model's language stream directly.** TRIBE's text features come from base
+  `meta-llama/Llama-3.2-3B`. Injecting the notebook's `v_self` into that Llama (same layer and ε) while TRIBE
+  encodes *neutral* probes gives the predicted cortical footprint of the LLM's mortality direction. It also
+  tests whether "steering" and "priming with mortality text" land in the same brain regions. Check first that the
+  vector was extracted from the base model rather than Instruct, or re-extract it on base.
+* Port the notebook's in-group-norm / out-group-exclusion items (translated) as probes, so both projects use the
+  same outcome items.
 
 * Validate: show that PAIN − NEU recovers the paper's emotional vs physical pain map before trusting MS − PAIN.
 * Use video primes (e.g. end-of-life film clips vs dental-procedure clips); TRIBE's video stream is then used too.

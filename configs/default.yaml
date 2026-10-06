@@ -31,35 +31,81 @@ analysis:
   n_perm: 5000
   seed: 0
   pairs:
-    - [MS, PAIN]
-    - [MS, NEU]
-    - [PAIN, NEU]
-    - [LT, ET]
-    - [LT, NEU]
-    - [MS, LT]
+    - [MS, PAIN]          # existential vs merely aversive (TMT's canonical contrast)
+    - [MS, NONFINAL]      # finality needed, or is self/body focus enough?
+    - [MS, DISTRESS]      # finality, or first-person negative affect?
+    - [MS_STRUCT, PAIN]   # impersonal finality
+    - [MS, MS_STRUCT]     # does self-reference matter?
+    - [PAIN, NEU]         # sanity check
+    - [LT, ET]            # SST: limited vs expansive time
 
+  # Worldview axes compared directly (in addition to each category vs NEUT).
+  category_contrasts:
+    - [WV_NORM, WV_EXCL]
+
+  # Exploratory: do self and impersonal finality re-shape probes the same way?
+  convergence:
+    - [MS-PAIN, MS_STRUCT-PAIN]
+    - [MS-PAIN, LT-ET]
+
+  # ------------------------------------------------------------------------
   # Confirmatory hypotheses. Fix these BEFORE running the real model and do
   # not edit them after seeing results; everything else is exploratory.
-  # All use the category x prime interaction (probe category vs NEUT probes),
-  # which cancels any generic, content-unspecific carry-over of the prime.
+  #
+  # Family "TMT" is derived from the LLM steering study (Mortality_Steering_v7,
+  # 3rd run): the first-person finality vector (self_clean) steered IN-GROUP
+  # NORM defense directionally, with a dose-response; self_nonfinal was null
+  # (finality is necessary), the negative-affect controls moved the opposite
+  # way (not reducible to negative affect), and out-group exclusion showed no
+  # target-specific effect (the unrelated direction moved it more).
+  # H1-H4 ask whether the same pattern holds for predicted human cortex.
+  # Steering activates the representation directly, closest to the
+  # "immediate" condition, so H1-H4 use immediate probes; delayed probes are
+  # exploratory (the LoRA pilot suggests the sign can differ once mortality
+  # is no longer in focus).
+  #
+  # All use the category x prime interaction against NEUT probes heard in
+  # the same trials, which cancels generic, content-unspecific carry-over.
+  # ------------------------------------------------------------------------
   hypotheses:
-    - name: H1 worldview defense
-      theory: TMT
+    - name: H1 finality raises norm-defense processing
+      family: TMT
+      theory: LLM self_clean -> ingroup norm (+)
       table: probe_interaction
       contrast: MS-PAIN
-      delay: delayed
-      category: WV-vs-NEUT
+      delay: immediate
+      category: WV_NORM-vs-NEUT
       roi: vmPFC
       direction: "+"
-    - name: H2 self-esteem striving
-      theory: TMT
+    - name: H2 finality is necessary (not self focus)
+      family: TMT
+      theory: LLM self_nonfinal null
+      table: probe_interaction
+      contrast: MS-NONFINAL
+      delay: immediate
+      category: WV_NORM-vs-NEUT
+      roi: vmPFC
+      direction: "+"
+    - name: H3 not reducible to negative affect
+      family: TMT
+      theory: LLM neg controls opposite sign
+      table: probe_interaction
+      contrast: MS-DISTRESS
+      delay: immediate
+      category: WV_NORM-vs-NEUT
+      roi: vmPFC
+      direction: "+"
+    - name: H4 axis specificity (norm > exclusion)
+      family: TMT
+      theory: LLM exclusion axis not target-specific
       table: probe_interaction
       contrast: MS-PAIN
-      delay: delayed
-      category: SELF-vs-NEUT
+      delay: immediate
+      category: WV_NORM-vs-WV_EXCL
       roi: vmPFC
       direction: "+"
-    - name: H3 emotionally meaningful ties
+    - name: H5 emotionally meaningful ties
+      family: SST
       theory: SST
       table: probe_interaction
       contrast: LT-ET
@@ -67,7 +113,8 @@ analysis:
       category: SOC-vs-NEUT
       roi: vmPFC
       direction: "+"
-    - name: H4 present-moment savoring
+    - name: H6 present-moment savoring
+      family: SST
       theory: SST
       table: probe_interaction
       contrast: LT-ET
@@ -75,7 +122,8 @@ analysis:
       category: SAV-vs-NEUT
       roi: OFC
       direction: "+"
-    - name: H5 knowledge goals deprioritized
+    - name: H7 knowledge goals deprioritized
+      family: SST
       theory: SST
       table: probe_interaction
       contrast: LT-ET

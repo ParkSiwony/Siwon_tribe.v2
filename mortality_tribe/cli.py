@@ -95,6 +95,8 @@ def cmd_analyze(cfg: dict, args) -> None:
         method=a["method"], lag=a["lag"], extra=a["extra"], pairs=[tuple(x) for x in a["pairs"]],
         control_category=a["control_category"], n_perm=a["n_perm"], seed=a["seed"],
         hypotheses=a.get("hypotheses", []),
+        category_contrasts=[tuple(x) for x in a.get("category_contrasts", [])],
+        convergence=[tuple(x) for x in a.get("convergence", [])],
     )
     n_vertices = predict.load_prediction(p["preds"] / f"{trials[0].trial_id}.npz")[1].shape[1]
     roi_idx = rois.hcp_roi_indices() if n_vertices == 20484 else rois.fake_roi_indices(n_vertices)

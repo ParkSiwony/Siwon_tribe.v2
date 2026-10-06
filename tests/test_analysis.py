@@ -52,10 +52,14 @@ def dry_run(tmp_path_factory):
         times, preds = model.predict(None, t, timings[timings.trial_id == t.trial_id])
         predict.save_prediction(tmp / "preds" / f"{t.trial_id}.npz", times, preds)
     cfg = analysis.AnalysisConfig(
-        pairs=[("MS", "PAIN"), ("LT", "ET")], n_perm=1000,
+        pairs=[("MS", "PAIN"), ("MS_STRUCT", "PAIN"), ("LT", "ET")], n_perm=1000,
+        category_contrasts=[("WV_NORM", "WV_EXCL")],
+        convergence=[("MS-PAIN", "MS_STRUCT-PAIN")],
         hypotheses=[
             dict(name="planted", table="probe_interaction", contrast="MS-PAIN", delay="delayed",
-                 category="WV-vs-NEUT", roi="vmPFC", direction="+"),
+                 category="WV_NORM-vs-NEUT", roi="vmPFC", direction="+"),
+            dict(name="axis", table="probe_interaction", contrast="MS-PAIN", delay="delayed",
+                 category="WV_NORM-vs-WV_EXCL", roi="vmPFC", direction="+"),
             dict(name="null", table="probe_interaction", contrast="LT-ET", delay="immediate",
                  category="SOC-vs-NEUT", roi="vmPFC", direction="+"),
         ],
@@ -68,12 +72,18 @@ def test_pipeline_recovers_planted_probe_effect(dry_run):
     results, _ = dry_run
     hyp = results["hypotheses"].set_index("name")
     assert hyp.loc["planted", "supported"]
+    assert hyp.loc["axis", "supported"]
     assert not hyp.loc["null", "supported"]
     inter = results["probe_interaction"]
     sig = inter[inter.p_fwe < 0.01]  # 1,000 permutations: too coarse for the global FDR here
     assert set(sig.roi) == {"vmPFC"}
-    assert set(sig.category) == {"WV-vs-NEUT"}
+    assert set(sig.category) <= {"WV_NORM-vs-NEUT", "WV_NORM-vs-WV_EXCL"}
     assert set(sig.contrast) == {"MS-PAIN"}
+    # MS_STRUCT has no planted effect, so its map should not mirror MS-PAIN's
+    conv = results["convergence"]
+    # no true convergence anywhere: nothing should beat the shared-baseline reference
+    assert {"r_cross", "r_ref_max", "beyond_baseline"} <= set(conv.columns)
+    assert conv.beyond_baseline.mean() <= 0.25
 
 
 def test_pipeline_recovers_planted_prime_effect(dry_run):
@@ -88,7 +98,8 @@ def test_pipeline_recovers_planted_prime_effect(dry_run):
 def test_outputs_written(dry_run):
     _, tmp = dry_run
     out = tmp / "results"
-    for name in ["prime_contrasts", "probe_modulation", "probe_interaction", "carryover", "decoding", "hypotheses"]:
+    for name in ["prime_contrasts", "probe_modulation", "probe_interaction", "carryover", "decoding",
+                 "convergence", "hypotheses"]:
         assert (out / f"{name}.csv").exists()
     assert "Pre-registered hypotheses" in (out / "summary.md").read_text()
     assert any((out / "maps").glob("*.npy"))

@@ -1,9 +1,19 @@
 # Prime passages (second-person guided imagery, read aloud by TTS).
 #
-# Two theoretical families, each with a matched control:
-#   Terror Management Theory (TMT):      MS  vs  PAIN  (aversive, non-existential control)
-#   Socioemotional Selectivity (SST):    LT  vs  ET    (limited vs expansive future time)
-#   Shared low-arousal baseline:         NEU
+# The TMT conditions mirror the vector sets of the LLM steering study
+# (Mortality_Steering_v7.ipynb), so brain-level and LLM-level results can be
+# compared construct by construct:
+#
+#   MS         first-person finality          <-> v_self   (mort_self_pairs)
+#   MS_STRUCT  impersonal finality             <-> v_struct (mort_struct_pairs)
+#   PAIN       sensory aversiveness, no finality <-> v_sens (neg_sensory_pairs)
+#   DISTRESS   first-person negative affect,   <-> v_negself (neg_self_pairs)
+#              no finality
+#   NONFINAL   first-person self/body focus,   <-> v_nonfinal (self_nonfinal_pairs)
+#              no ending
+#
+# Socioemotional Selectivity Theory (SST):  LT vs ET (limited vs expansive time)
+# Shared low-arousal baseline:              NEU
 #
 # Writing rules used for every item (keep them when adding new ones):
 #   * 85-110 words, second person, present tense, 6-8 sentences.
@@ -14,10 +24,19 @@
 
 conditions:
   MS:
-    label: Mortality salience
+    label: Mortality salience, first person (self finality)
+    family: TMT
+  MS_STRUCT:
+    label: Impersonal finality (irreversible endings of things and others)
     family: TMT
   PAIN:
-    label: Dental pain (aversive control)
+    label: Dental pain (sensory aversive control)
+    family: TMT
+  DISTRESS:
+    label: First-person emotional distress without finality
+    family: TMT
+  NONFINAL:
+    label: First-person self/body focus without any ending
     family: TMT
   LT:
     label: Limited future time
@@ -70,6 +89,44 @@ items:
         thought of your own death brings up in you, right now, as you imagine
         it happening.
 
+
+  MS_STRUCT:
+    - id: MSS1
+      text: >
+        Consider an old oak tree that has stood beside a village road for three
+        hundred years. One winter it is cut down, and the stump is pulled from
+        the ground. The wood is burned, the roots rot away, and the place where
+        it stood becomes part of a parking lot. No one who walks there knows
+        the tree ever existed. Nothing can bring it back, not in a hundred
+        years, not ever. Everything the tree was, every ring of growth it ever
+        added, is simply gone for good.
+    - id: MSS2
+      text: >
+        Somewhere in the night sky, a star is running out of fuel. For billions
+        of years it has burned steadily, but now its core collapses and its
+        light goes out. The planets that circled it grow cold and dark. Their
+        oceans freeze and their surfaces crack. Over unimaginable spans, the
+        remaining dust drifts apart into empty space. Whatever existed there,
+        whatever patterns formed, is erased permanently. The process cannot be
+        reversed, and nothing anywhere will ever carry a trace of what was lost.
+    - id: MSS3
+      text: >
+        A language is spoken today by only one elderly woman in a small
+        mountain village. When she is gone, its words will never again be
+        spoken by anyone. Its songs, its jokes, its names for plants and winds
+        will vanish along with her. A few recordings may sit in an archive, but
+        no child will ever grow up thinking in it. Once that final speaker is
+        gone, the language is finished forever. Nothing can restore it, and the
+        world will continue exactly as before, simply without it.
+    - id: MSS4
+      text: >
+        A species of small bird lived only on one island. Its forest was
+        cleared, and year after year fewer nests were found. Eventually the
+        last individual was seen, and then never again. The species is now
+        extinct. Its song, its colors, its particular way of building nests are
+        gone from the earth for good. Museums keep a few feathers in a drawer,
+        but no living bird of its kind will ever fly again. The loss is
+        complete, permanent, and cannot be undone by anyone.
   PAIN:
     - id: PAIN1
       text: >
@@ -108,6 +165,84 @@ items:
         pulsing burn that no painkiller can touch. Everything you planned for
         the day is left unfinished. Focus on the emotions that this pain brings
         up in you, right now, as you imagine it happening.
+
+
+  DISTRESS:
+    - id: DIS1
+      text: >
+        Take a moment to imagine feeling deeply anxious. Picture the moment a
+        tight knot forms in your stomach and refuses to loosen. Your thoughts
+        race, and every small worry feels enormous. You replay a mistake you
+        made at work over and over. At night you lie awake, staring at the
+        ceiling, unable to settle. Every thought is pulled back toward the
+        worry. Notice what emotions arise as you think about this anxiety, and
+        about how it feels in your body as the tension grows stronger.
+    - id: DIS2
+      text: >
+        Imagine a manager calling you into an office and telling you, coldly,
+        that your work has disappointed everyone. Picture yourself sitting in
+        the chair, your face burning, your hands unsure where to rest. You feel
+        small and exposed, as if everyone outside the glass wall can see your
+        shame. Your voice catches when you try to answer. Minutes stretch on
+        while the criticism continues. Stay with the feeling of that shame and
+        embarrassment, the certainty that this is really happening to you.
+    - id: DIS3
+      text: >
+        Think about a weekend when you, personally, feel completely lonely. Not
+        someone else, not a character in a story, but you. Imagine your phone
+        staying silent for two whole days. Imagine scrolling through photos of
+        friends gathered together without you. Then imagine the quiet evening,
+        when the apartment feels too large and the silence presses in. You feel
+        unwanted and forgotten for a while. Let yourself feel what that sadness
+        and loneliness are like, right now, as you picture that weekend.
+    - id: DIS4
+      text: >
+        Picture an ordinary day that turns into a day of intense frustration.
+        You wake up, you dress, you step outside, and everything goes wrong.
+        The bus is late, an important file is lost, and a friend snaps at you
+        for no reason. Imagine the anger building in your chest until your jaw
+        is clenched and your hands are shaking. Every small obstacle feels like
+        an insult. Focus on the emotions that this frustration brings up in
+        you, right now, as you imagine it happening.
+
+  NONFINAL:
+    - id: NF1
+      text: >
+        Take a moment to imagine your own body as it is right now. Picture your
+        heart beating steadily and your breath moving in and out. Your muscles
+        tense and relax as you shift in your seat. Blood flows through your
+        hands and feet, warming them. Your stomach is quietly digesting your
+        breakfast. All of these processes keep going on their own, moment after
+        moment. Notice what you feel as you pay attention to your own body,
+        and to everything that is happening inside you physically.
+    - id: NF2
+      text: >
+        Imagine a doctor sitting across from you and telling you, calmly, that
+        your annual checkup results are completely normal. Picture yourself in
+        the examination room, the paper sheet crinkling as you move. The doctor
+        explains your blood pressure, your heart rate, and how your body
+        repairs itself every day. Skin cells are replaced, bones remodel, and
+        the body keeps adjusting to whatever you eat, how you sleep, and how
+        much you move. Stay with the feeling of your own body as a
+        living system that keeps renewing itself, again and again.
+    - id: NF3
+      text: >
+        Think about the fact that you, personally, are always changing. Not
+        someone else, not a character in a story, but you. Imagine yourself as
+        a child, then as you are today, then a few seasons from now with a new
+        haircut and new habits. Your opinions shift, your skills grow, your
+        tastes develop. Some changes you can undo and some you simply move
+        past. Let yourself feel what it means to be a person who keeps
+        growing and changing over and over.
+    - id: NF4
+      text: >
+        Picture an ordinary day in which you pay close attention to yourself.
+        You wake up, you stretch, and you notice how your shoulders feel
+        stiff. After breakfast you take a walk and feel your legs warming up
+        and your breathing deepen. Later you notice your mood rising after
+        talking with a friend, and dipping a little when you get tired. By the
+        evening you feel rested again. Focus on these small shifts in your body
+        and mind as you imagine them happening.
 
   LT:
     - id: LT1

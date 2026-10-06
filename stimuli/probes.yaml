@@ -9,7 +9,11 @@
 #   SOC   emotionally meaningful social bonds      (SST: up under limited time)
 #   SAV   present-moment sensory savoring           (SST / "carpe diem": up under LT)
 #   ACH   novelty, knowledge, career, achievement   (SST: down under LT; TMT: self-esteem striving)
-#   WV    cultural worldview, in-group, tradition   (TMT: up under MS, worldview defense)
+#   WV_NORM  in-group norm defense: upholding our traditions and rules
+#   WV_EXCL  out-group exclusion: rejecting outsiders and deviants
+#            The two worldview axes are kept separate because the LLM study
+#            (Mortality_Steering_v7) found they respond differently, even in
+#            opposite directions: pooling them hid the effect.
 #   SELF  self-worth, competence, being valued      (TMT: up under MS, self-esteem buffer)
 #   NEUT  factual, low-relevance statements         (control for generic carry-over)
 #
@@ -22,7 +26,8 @@ categories:
   SOC: Close relationships
   SAV: Present-moment savoring
   ACH: Achievement and novelty
-  WV: Cultural worldview
+  WV_NORM: In-group norm defense
+  WV_EXCL: Out-group exclusion
   SELF: Self-worth
   NEUT: Neutral facts
 
@@ -54,15 +59,24 @@ items:
     - A degree in engineering could lead to a well paid career.
     - Traveling alone to an unknown city would teach me many things.
     - I keep a detailed schedule so I can reach every goal.
-  WV:
+  WV_NORM:
     - Our national traditions deserve to be protected and passed down.
-    - People from my country share values that outsiders rarely understand.
     - Religious holidays bring our whole community together in celebration.
-    - Anyone who insults our flag should be strongly condemned.
     - The customs of my culture are the right way to live.
-    - Our team represents everything that is good about our town.
-    - Foreigners who criticize our way of life simply do not understand.
     - The founders of our nation were wise and honorable leaders.
+    - Children should be raised to respect the values of their elders.
+    - Our community rules exist for good reasons and should be followed.
+    - People should honor the national anthem by standing up straight.
+    - Keeping our language pure is a duty we owe our ancestors.
+  WV_EXCL:
+    - Foreigners who criticize our way of life simply do not understand.
+    - Anyone who insults our flag should be strongly condemned.
+    - Immigrants who refuse our customs should not be welcomed here.
+    - People with strange beliefs should keep away from our neighborhood.
+    - Outsiders usually bring trouble when they move into our town.
+    - Those who mock our religion deserve to be shunned by everyone.
+    - Strangers from other regions cannot really be trusted with our secrets.
+    - Groups that reject our values should not hold public office.
   SELF:
     - I am a capable person who handles difficult problems well.
     - My work is valued by the people around me.

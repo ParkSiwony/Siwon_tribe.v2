@@ -12,8 +12,9 @@ We use Meta's TRIBE v2, a model that predicts whole-cortex fMRI responses to spe
 ## How (in one picture)
 ```
 [ prime ]  ──►  ( neutral filler )?  ──►  [ probe sentences: identical in every condition ]
- MS / dental pain / limited time /            worldview · self-worth · close relationships ·
- expansive time / neutral                     savoring · achievement · neutral facts
+ MS (self finality) · MS_STRUCT (impersonal     in-group norms · out-group exclusion · self-worth ·
+ finality) · dental pain · distress · non-final close relationships · savoring · achievement ·
+ self focus · limited / expansive time · neutral  neutral facts
 ```
 Probe content, audio and order are held constant, so any change in the predicted brain response comes from the prime alone.
 
@@ -25,11 +26,17 @@ Probe content, audio and order are held constant, so any change in the predicted
 | A lingering mood, or selective re-weighting? | Spatial carry-over of the prime pattern into probes |
 | Is the prime still "readable" later? | Decoding the prime from probe responses alone |
 
-There are five pre-registered hypotheses (H1–H2 for TMT, H3–H5 for SST), tested with Holm correction. Everything else is exploratory.
+Seven pre-registered hypotheses are tested with Holm correction within each family. **H1–H4** take their predictions from the LLM steering study:
+* first-person finality raises in-group *norm* processing (H1);
+* the effect needs finality, not just self focus (H2);
+* it isn't negative affect (H3);
+* it's specific to the norm axis rather than exclusion (H4).
+
+**H5–H7** test Socioemotional Selectivity Theory. Everything else is exploratory.
 
 ## Status
 * The full pipeline is implemented: stimuli, TTS, TRIBE inference, GLM, permutation statistics and figures.
-* An offline dry run with planted effects recovers the true effect and rejects the nulls (16 tests pass).
+* An offline dry run with planted effects recovers the true effect and rejects the nulls (17 tests pass).
 * **Pending:** running the real model. This needs a GPU and access to Llama-3.2-3B.
 
 ## Relation to the "AI mortality" LLM project

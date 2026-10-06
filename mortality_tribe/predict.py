@@ -66,7 +66,7 @@ class FakePredictor:
     Each segment category drives a fixed random spatial pattern, convolved
     with an HRF. On top of that:
       * every MS prime additionally activates the ``salience`` ROI, and
-      * WV probes that follow an MS prime additionally activate ``vmPFC``.
+      * WV_NORM probes that follow an MS prime additionally activate ``vmPFC``.
     A correct analysis pipeline must recover exactly these two effects.
     """
 
@@ -91,7 +91,7 @@ class FakePredictor:
             pattern = self._pattern(row.category).copy()
             if row.kind == "prime" and trial.prime_cond == "MS":
                 pattern[self.rois["salience"]] += self.effect
-            if row.kind == "probe" and row.category == "WV" and trial.prime_cond == "MS":
+            if row.kind == "probe" and row.category == "WV_NORM" and trial.prime_cond == "MS":
                 pattern[self.rois["vmPFC"]] += self.effect
             drive += box[:, None] * pattern[None, :]
         h = hrf()
