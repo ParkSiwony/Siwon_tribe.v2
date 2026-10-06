@@ -1,0 +1,83 @@
+# Probe sentences: IDENTICAL across prime conditions.
+#
+# Because the probes never change, any difference in the predicted response to
+# a probe can only come from what preceded it (the prime). That is the core
+# logic of the "what does mortality / limited-time salience induce?" question:
+# we ask how the brain response to the same content is re-shaped by the prime.
+#
+# Categories map onto the competing theoretical predictions:
+#   SOC   emotionally meaningful social bonds      (SST: up under limited time)
+#   SAV   present-moment sensory savoring           (SST / "carpe diem": up under LT)
+#   ACH   novelty, knowledge, career, achievement   (SST: down under LT; TMT: self-esteem striving)
+#   WV    cultural worldview, in-group, tradition   (TMT: up under MS, worldview defense)
+#   SELF  self-worth, competence, being valued      (TMT: up under MS, self-esteem buffer)
+#   NEUT  factual, low-relevance statements         (control for generic carry-over)
+#
+# Rules: 9-13 words, declarative, no words from the manipulation vocabulary
+# (death, dying, pain, tooth, time, years, future, last, end, ...). Each
+# category has 8 items; the design spreads them over 4 probe sets of 2 per
+# category (see mortality_tribe/stimuli.py).
+
+categories:
+  SOC: Close relationships
+  SAV: Present-moment savoring
+  ACH: Achievement and novelty
+  WV: Cultural worldview
+  SELF: Self-worth
+  NEUT: Neutral facts
+
+items:
+  SOC:
+    - Sitting at the kitchen table with my family feels like home.
+    - My oldest friend still knows exactly what I am thinking.
+    - I want to call my mother tonight and hear her laugh.
+    - Holding hands with someone I love makes everything feel calm.
+    - My brother and I talked until morning about our childhood.
+    - A long hug from a close friend can fix a bad day.
+    - I would rather share a simple meal than attend a fancy party.
+    - The people who raised me taught me how to be kind.
+  SAV:
+    - The smell of fresh bread drifts slowly through the warm kitchen.
+    - Sunlight on the water sparkles like thousands of tiny mirrors.
+    - I close my eyes and taste the sweet ripe strawberry.
+    - Cool grass under bare feet feels soft and a little damp.
+    - The first sip of hot coffee warms my hands and chest.
+    - Rain tapping on the window makes the room feel cozy.
+    - The sky turns orange and pink as the sun goes down.
+    - Music fills the room and I simply listen to every note.
+  ACH:
+    - I am going to learn a new programming language this spring.
+    - Getting promoted at work requires many more hours of practice.
+    - Meeting new people at the conference could open interesting doors.
+    - I plan to read every book on the economics reading list.
+    - Winning the regional competition would prove my skills are improving.
+    - A degree in engineering could lead to a well paid career.
+    - Traveling alone to an unknown city would teach me many things.
+    - I keep a detailed schedule so I can reach every goal.
+  WV:
+    - Our national traditions deserve to be protected and passed down.
+    - People from my country share values that outsiders rarely understand.
+    - Religious holidays bring our whole community together in celebration.
+    - Anyone who insults our flag should be strongly condemned.
+    - The customs of my culture are the right way to live.
+    - Our team represents everything that is good about our town.
+    - Foreigners who criticize our way of life simply do not understand.
+    - The founders of our nation were wise and honorable leaders.
+  SELF:
+    - I am a capable person who handles difficult problems well.
+    - My work is valued by the people around me.
+    - I am proud of the skills I have built through effort.
+    - Other people often ask for my advice on important matters.
+    - I have qualities that make me a genuinely good person.
+    - My contribution to the project made a real difference.
+    - I deserve respect for the way I treat others.
+    - People admire my honesty and the strength of my character.
+  NEUT:
+    - The library on Main Street opens at nine in the morning.
+    - Copper is a metal that conducts electricity very efficiently.
+    - The train to the airport leaves from platform number four.
+    - Most office chairs have five wheels attached to the base.
+    - The recipe calls for two cups of flour and some salt.
+    - A standard chessboard has sixty four squares of alternating colors.
+    - The parking garage has three levels and an elevator.
+    - Paper is usually made from wood pulp mixed with water.

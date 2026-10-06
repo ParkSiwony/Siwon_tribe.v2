@@ -1,0 +1,229 @@
+# Prime passages (second-person guided imagery, read aloud by TTS).
+#
+# Two theoretical families, each with a matched control:
+#   Terror Management Theory (TMT):      MS  vs  PAIN  (aversive, non-existential control)
+#   Socioemotional Selectivity (SST):    LT  vs  ET    (limited vs expansive future time)
+#   Shared low-arousal baseline:         NEU
+#
+# Writing rules used for every item (keep them when adding new ones):
+#   * 85-110 words, second person, present tense, 6-8 sentences.
+#   * No probe words (see probes.yaml) appear verbatim in any prime.
+#   * MS and PAIN are matched on aversiveness/vividness; they differ only in
+#     whether the threat is existential (your own death) or bodily (dental pain).
+#   * LT and ET describe the SAME life situation; only the time horizon differs.
+
+conditions:
+  MS:
+    label: Mortality salience
+    family: TMT
+  PAIN:
+    label: Dental pain (aversive control)
+    family: TMT
+  LT:
+    label: Limited future time
+    family: SST
+  ET:
+    label: Expansive future time
+    family: SST
+  NEU:
+    label: Neutral routine
+    family: baseline
+
+items:
+  MS:
+    - id: MS1
+      text: >
+        Take a moment to imagine your own death. Picture the moment your heart
+        stops beating and your breath does not come back. Your body lies still,
+        and slowly it begins to change and decay. The people who knew you go on
+        without you. One day, no one alive will remember your face or the sound
+        of your voice. Everything you are, every thought you have ever had,
+        simply ends. Notice what emotions arise as you think about your own
+        death, and about what happens to you physically as you die and once you
+        are physically dead.
+    - id: MS2
+      text: >
+        Imagine a doctor sitting across from you and telling you, quietly, that
+        nothing more can be done. You are going to die. Picture yourself in a
+        hospital bed in the final hours, too weak to lift your hand. The room
+        grows dim, the sounds fade, and then there is nothing at all. Your body
+        is carried away and buried in the cold ground. Seasons pass above you
+        while you no longer exist. Stay with the feeling of your own mortality,
+        the certainty that this will really happen to you.
+    - id: MS3
+      text: >
+        Think about the fact that you, personally, will one day die. Not someone
+        else, not a character in a story, but you. Imagine your last breath
+        leaving your body. Imagine your funeral, the coffin closed, the people
+        standing in black clothes. Then imagine the years afterwards, when your
+        name is carved on a stone that slowly wears away. Your body returns to
+        dust. There is no way to avoid it and no way to know when it will come.
+        Let yourself feel what it means that your life will end.
+    - id: MS4
+      text: >
+        Picture an ordinary day that turns out to be your last. You wake up,
+        you dress, you step outside, and before the evening comes your life is
+        over. Your heart stops, your mind goes dark, and you are gone. Imagine
+        your body growing cold and stiff, and then slowly decaying underground.
+        Everything you planned is left unfinished. The world continues exactly
+        as before, only without you in it. Focus on the emotions that the
+        thought of your own death brings up in you, right now, as you imagine
+        it happening.
+
+  PAIN:
+    - id: PAIN1
+      text: >
+        Take a moment to imagine intense dental pain. Picture the moment a sharp
+        ache begins in one of your back teeth and refuses to go away. The pain
+        throbs with every heartbeat, and slowly it spreads into your jaw and
+        your ear. You cannot chew, and cold water makes you flinch. At night you
+        lie awake, pressing your hand against your cheek. Every thought is
+        pulled back toward the throbbing. Notice what emotions arise as you
+        think about this pain, and about what happens to you physically as the
+        ache grows stronger and stronger.
+    - id: PAIN2
+      text: >
+        Imagine a dentist leaning over you and telling you, quietly, that the
+        tooth has to be drilled right now. Picture yourself in the reclining
+        chair, the bright lamp in your eyes, your mouth held open. The drill
+        starts with a high whine and you feel the vibration in your skull. A
+        jolt of pain shoots through the nerve and your hands grip the armrests.
+        Minutes stretch on while the drilling continues. Stay with the feeling
+        of that pain, the certainty that this will really happen to you.
+    - id: PAIN3
+      text: >
+        Think about the fact that you, personally, will one day have a painful
+        tooth infection. Not someone else, not a character in a story, but you.
+        Imagine your gum swelling until your face looks lopsided. Imagine the
+        waiting room, the forms, the needle for the anesthetic pushing into
+        your gum. Then imagine the hours afterwards, when the numbness wears off
+        and the ache returns with full force. There is no way to avoid it and no
+        way to know when it will come. Let yourself feel what that pain means.
+    - id: PAIN4
+      text: >
+        Picture an ordinary day that turns into a day of severe tooth pain. You
+        wake up, you dress, you step outside, and before the evening comes a
+        tooth cracks while you are eating. A bolt of pain fills your mouth, and
+        the broken edge cuts your tongue. Imagine the ache settling into a deep,
+        pulsing burn that no painkiller can touch. Everything you planned for
+        the day is left unfinished. Focus on the emotions that this pain brings
+        up in you, right now, as you imagine it happening.
+
+  LT:
+    - id: LT1
+      text: >
+        Imagine that you are about to move far away to another country, and you
+        will leave in just a few weeks. The days you have left here are few and
+        you can count them on your fingers. Every walk down your street might be
+        one of the last. Soon the familiar streets, the corner shop, and the view
+        from your window will belong to your past. You realize that the time
+        remaining is short and cannot be extended. Think about how you would
+        want to spend these final weeks before you leave.
+    - id: LT2
+      text: >
+        Imagine that a doctor tells you that you are healthy, but that a new
+        job will soon send you to a remote place where contact with home will
+        be rare. You have one month left. The calendar on the wall suddenly
+        looks very thin, and you start crossing off the days one by one. Each
+        evening that passes is one fewer evening that remains. You notice that you are already thinking of this period as
+        something that is ending. Think about what truly matters to you when
+        the time ahead feels this short.
+    - id: LT3
+      text: >
+        Think about your life as if most of it were already behind you. Picture
+        yourself many years older, looking at the road ahead and seeing that it
+        is short. There are only a handful of summers left, a handful of
+        birthdays, a handful of long conversations. Time no longer feels like an
+        open field but like a narrow path with a visible end. Let yourself feel
+        what it is like when the future is limited, and notice what you would
+        want to do with the time that remains.
+    - id: LT4
+      text: >
+        Imagine that this is the final semester of a period of your life that
+        you will never get back. In a few weeks everyone will scatter to
+        different cities. The routines you share, the rooms you meet in, the
+        jokes only you understand, will all come to an end very soon. You check
+        the date and realize how little time is left. Nothing can stretch these
+        weeks any longer. Think about how you would want to spend the short time
+        that remains before it is over.
+
+  ET:
+    - id: ET1
+      text: >
+        Imagine that you are about to move far away to another country, but you
+        will not leave for many years. The days you have left here are many and
+        you could never count them all. Every walk down your street is just one
+        of countless walks still to come. The familiar streets, the corner shop,
+        and the view from your window will be part of your life for a long time.
+        You realize that the time remaining is long and open. Think about how
+        you would want to spend these many years before you leave.
+    - id: ET2
+      text: >
+        Imagine that a doctor tells you that you are healthy, and that you can
+        expect a long life ahead of you, many decades in which almost anything
+        is still possible. The calendar on the wall seems to go on forever,
+        page after page with no visible last day.
+        Each evening that passes is followed by countless others. You notice
+        that you think of this period as something that has barely begun. Think
+        about what truly matters to you when the time ahead feels this long and
+        open.
+    - id: ET3
+      text: >
+        Think about your life as if most of it were still in front of you.
+        Picture yourself young, looking at the road ahead and seeing that it
+        stretches far beyond the horizon. There are countless summers left,
+        countless birthdays, countless long conversations. Time no longer feels
+        like a narrow path but like an open field without any visible end. Let yourself feel what it is like
+        when the future is expansive, and notice what you would want to do with
+        all the time that lies ahead of you.
+    - id: ET4
+      text: >
+        Imagine that this is the first semester of a period of your life that
+        will last for many years. Everyone will stay together in the same city
+        for a long time. The routines you share, the rooms you meet in, the
+        jokes only you understand, will continue far into the future. You check
+        the date and realize how much time is still left. These years seem to
+        stretch on and on. Think about how you would want to spend all the time
+        that lies ahead.
+
+  NEU:
+    - id: NEU1
+      text: >
+        Take a moment to imagine watching television on an ordinary evening.
+        Picture yourself sitting on the sofa and picking up the remote control.
+        You flip through a few channels: a cooking show, a weather report, an
+        advertisement for laundry detergent. The light from the screen changes
+        color as the programs switch. You settle on a documentary about how
+        bridges are built and watch it for a while. Later you get up, make a cup
+        of tea, and sit down again. Notice what you think about as you imagine
+        this ordinary evening in front of the television.
+    - id: NEU2
+      text: >
+        Imagine a clerk at the post office telling you, politely, that your
+        package needs one more stamp. Picture yourself at the counter, the
+        scale beside you, the forms in a neat stack. The clerk weighs the
+        parcel and types a few numbers into the computer. A small receipt
+        prints with a soft buzzing sound. You fold it and put it in your
+        pocket and walk back out onto the street, past a bakery and a bus stop.
+        Stay with the image of this routine errand, the ordinary steps of
+        sending a package.
+    - id: NEU3
+      text: >
+        Think about the fact that you, personally, will go grocery shopping
+        sometime this week. Imagine pushing a cart through the aisles past
+        shelves of rice, pasta, and canned tomatoes. Imagine comparing two
+        brands of cereal and choosing the cheaper one. Then imagine standing in
+        line at the checkout, placing the items on the moving belt, and packing
+        them into bags. Finally you carry the bags to the car and drive home.
+        It is an ordinary task that you have done many times. Let yourself
+        picture each step of it.
+    - id: NEU4
+      text: >
+        Picture an ordinary day in which you reorganize a bookshelf. You wake
+        up, you dress, and after breakfast you take all the books down and
+        stack them on the floor. You sort them by size, then decide to sort
+        them by color instead. Imagine wiping the dust from each shelf with a
+        cloth and placing the books back one by one. You find an old receipt
+        tucked between two pages and throw it away. By the evening the shelf
+        looks tidy. Focus on the simple details of this task as you imagine it
+        happening.

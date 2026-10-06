@@ -1,0 +1,32 @@
+# Neutral filler passages used as the "delay" in the delayed condition.
+#
+# Classic TMT studies find that worldview-defense effects are strongest after
+# a short distraction (distal defenses), not immediately after the prime
+# (proximal defenses). The filler plays that role here. In TRIBE terms, the
+# filler pushes the prime further back in the language model's context window
+# (Llama-3.2 sees the 1,024 preceding words) and, for a long enough filler,
+# out of the 100-s transformer window entirely.
+#
+# Rules: 80-110 words, third person, emotionally flat, no overlap with the
+# vocabulary of primes.yaml or probes.yaml.
+
+items:
+  - id: FIL1
+    text: >
+      The common garden snail moves by contracting a broad muscle along the
+      underside of its shell. Waves of contraction travel from the tail toward
+      the head, and a thin layer of mucus reduces friction on rough surfaces.
+      Snails are most active after rain, when the air is humid. During dry
+      periods they seal the opening of the shell with a papery layer and rest.
+      Their diet consists mainly of soft leaves, fungi, and decaying plant
+      matter. The shell grows in a spiral, adding new material at its outer
+      edge as the animal increases in size.
+  - id: FIL2
+    text: >
+      A standard pencil is made by placing a thin rod of graphite and clay
+      between two grooved strips of cedar wood. The strips are glued together,
+      pressed, and then cut into individual hexagonal or round shapes. Several
+      coats of paint are applied, and a small metal band is crimped onto one
+      end to hold an eraser. The ratio of graphite to clay determines how hard
+      or soft the pencil writes. Harder leads leave lighter, finer lines,
+      while softer leads leave darker marks that smudge more easily on paper.

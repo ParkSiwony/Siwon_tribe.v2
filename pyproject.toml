@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mortality-tribe"
+version = "0.1.0"
+description = "In-silico mortality and limited-time salience experiments with Meta's TRIBE v2 brain encoder"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "pyyaml",
+  "soundfile",
+  "scikit-learn",
+]
+
+[project.optional-dependencies]
+tribe = [
+  "tribev2[plotting] @ git+https://github.com/facebookresearch/tribev2.git",
+  "gtts",
+  "mne",
+]
+plot = ["matplotlib"]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["mortality_tribe*"]

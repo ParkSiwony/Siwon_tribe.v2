@@ -1,0 +1,87 @@
+# Default configuration for the mortality / limited-time salience experiment.
+stimuli_dir: stimuli
+output_dir: outputs
+
+# Text-to-speech backend: "gtts" (needs internet + ffmpeg) or "silent" (dry run only).
+tts: gtts
+
+design:
+  delays: [immediate, delayed]   # delayed = neutral filler between prime and probes
+  crossing: latin                # latin: prime item j -> probe set j; full: every item x every set
+  n_probe_sets: 4
+  seed: 0
+
+timing:                          # seconds of silence
+  lead_in: 2.0
+  after_prime: 12.0      # >= 12 s: avoids prime HRF spill-over onto probes
+  after_filler: 12.0
+  between_probes: 8.0
+  tail: 10.0
+
+model:
+  checkpoint: facebook/tribev2   # HuggingFace repo or local folder with config.yaml + best.ckpt
+  cache_folder: ./cache          # feature-extraction cache (large)
+  device: auto
+
+analysis:
+  method: glm                    # glm (recommended) or window
+  lag: 5.0                       # window method only; check results/figures/probe_timecourses.png
+  extra: 1.0
+  control_category: NEUT
+  n_perm: 5000
+  seed: 0
+  pairs:
+    - [MS, PAIN]
+    - [MS, NEU]
+    - [PAIN, NEU]
+    - [LT, ET]
+    - [LT, NEU]
+    - [MS, LT]
+
+  # Confirmatory hypotheses. Fix these BEFORE running the real model and do
+  # not edit them after seeing results; everything else is exploratory.
+  # All use the category x prime interaction (probe category vs NEUT probes),
+  # which cancels any generic, content-unspecific carry-over of the prime.
+  hypotheses:
+    - name: H1 worldview defense
+      theory: TMT
+      table: probe_interaction
+      contrast: MS-PAIN
+      delay: delayed
+      category: WV-vs-NEUT
+      roi: vmPFC
+      direction: "+"
+    - name: H2 self-esteem striving
+      theory: TMT
+      table: probe_interaction
+      contrast: MS-PAIN
+      delay: delayed
+      category: SELF-vs-NEUT
+      roi: vmPFC
+      direction: "+"
+    - name: H3 emotionally meaningful ties
+      theory: SST
+      table: probe_interaction
+      contrast: LT-ET
+      delay: immediate
+      category: SOC-vs-NEUT
+      roi: vmPFC
+      direction: "+"
+    - name: H4 present-moment savoring
+      theory: SST
+      table: probe_interaction
+      contrast: LT-ET
+      delay: immediate
+      category: SAV-vs-NEUT
+      roi: OFC
+      direction: "+"
+    - name: H5 knowledge goals deprioritized
+      theory: SST
+      table: probe_interaction
+      contrast: LT-ET
+      delay: immediate
+      category: ACH-vs-NEUT
+      roi: vmPFC
+      direction: "-"
+
+dry_run_vertices: 400
