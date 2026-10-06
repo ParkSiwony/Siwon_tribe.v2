@@ -24,6 +24,7 @@ tribe = [
   "mne",
 ]
 plot = ["matplotlib"]
+pilot = ["diffusers", "accelerate", "moviepy>=2.1", "pillow", "tokenizers", "jupyter"]
 test = ["pytest"]
 
 [tool.setuptools.packages.find]

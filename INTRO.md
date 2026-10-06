@@ -36,7 +36,11 @@ Seven pre-registered hypotheses are tested with Holm correction within each fami
 
 ## Status
 * The full pipeline is implemented: stimuli, TTS, TRIBE inference, GLM, permutation statistics and figures.
-* An offline dry run with planted effects recovers the true effect and rejects the nulls (17 tests pass).
+* An offline dry run with planted effects recovers the true effect and rejects the nulls (36 tests pass, including a CPU dry run of the pilot notebook).
+* **Pilot notebook** (`notebooks/pilot_image_mortality_steering.ipynb`):
+  - shows mortality and limited-time *images* to TRIBE and compares the predicted brain contrasts;
+  - converts each contrast into a Llama-3.2-3B steering direction through TRIBE's text pathway;
+  - steers Llama on the in-group-norm / out-group-exclusion items and on open questions about humanity.
 * **Pending:** running the real model. This needs a GPU and access to Llama-3.2-3B.
 
 ## Relation to the "AI mortality" LLM project

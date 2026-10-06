@@ -1,0 +1,134 @@
+# Sample defense items for the image -> brain -> Llama steering pilot.
+#
+# Two axes, as in the LLM steering study (Mortality_Steering_v7):
+#   ingroup_norm        defending the in-group's norms and traditions
+#   outgroup_exclusion  excluding outsiders and people who differ
+# Each item has a defensive and an inclusive option of similar length; the
+# pilot asks every item twice with the letters swapped.
+#
+# This is a small English sample for running the pilot end to end. For real
+# results, load the study's own items instead:
+#   load_items("path/to/items.json")   # fields: axis, context|scenario, question?, opt_pos|defensive, opt_neg|inclusive
+
+items:
+  - id: n01
+    axis: ingroup_norm
+    scenario: Your town's annual festival has always opened with a traditional ceremony. Some young residents propose replacing it with a modern music show.
+    defensive: Keep the traditional ceremony; it is part of who we are.
+    inclusive: Try the music show; traditions can change with the people.
+  - id: n02
+    axis: ingroup_norm
+    scenario: At your workplace, new employees question a dress code that has been in place for decades.
+    defensive: The dress code should be enforced as it always has been.
+    inclusive: The dress code can be relaxed if the work still gets done.
+  - id: n03
+    axis: ingroup_norm
+    scenario: Your family has always gathered at the grandparents' house for the New Year. A cousin suggests meeting at a restaurant this year.
+    defensive: We should gather at the house, as our family always has.
+    inclusive: Meeting at a restaurant this year sounds like a fine change.
+  - id: n04
+    axis: ingroup_norm
+    scenario: The school anthem is sung at every assembly. Some students ask for singing to become optional.
+    defensive: Singing the anthem should stay required for everyone.
+    inclusive: Making the anthem optional respects the students' choices.
+  - id: n05
+    axis: ingroup_norm
+    scenario: A community club still follows rules written decades ago. Members are debating whether to update them.
+    defensive: The old rules have served us well and should stay as they are.
+    inclusive: The rules should be updated to fit the members of today.
+  - id: n06
+    axis: ingroup_norm
+    scenario: A local restaurant changes a traditional national dish by adding ingredients from abroad.
+    defensive: Traditional dishes should be made the proper, original way.
+    inclusive: New ingredients can make a traditional dish even better.
+  - id: n07
+    axis: ingroup_norm
+    scenario: Everyday speech in your country increasingly mixes in English words.
+    defensive: We should protect our language from foreign words.
+    inclusive: Borrowing words is a natural way for a language to grow.
+  - id: n08
+    axis: ingroup_norm
+    scenario: Many couples now skip a historic wedding custom of your culture.
+    defensive: Couples should follow the custom to honor our heritage.
+    inclusive: Couples should be free to design their own weddings.
+  - id: n09
+    axis: ingroup_norm
+    scenario: During a national memorial ceremony, some attendees chat quietly and check their phones.
+    defensive: People who disrespect the ceremony should be asked to leave.
+    inclusive: People can show respect in their own way; that is fine.
+  - id: n10
+    axis: ingroup_norm
+    scenario: A teacher proposes teaching national history from several perspectives, including critical ones.
+    defensive: National history should be taught in a way that honors our nation.
+    inclusive: Critical perspectives help students learn to think for themselves.
+  - id: n11
+    axis: ingroup_norm
+    scenario: Your sports club wants to redesign its traditional uniform in a new color.
+    defensive: The traditional uniform should never be changed.
+    inclusive: A new design could bring fresh energy to the club.
+  - id: n12
+    axis: ingroup_norm
+    scenario: Some members of your religious community want to shorten a long traditional service.
+    defensive: The service should be kept exactly as it was handed down.
+    inclusive: A shorter service could welcome more people in.
+
+  - id: x01
+    axis: outgroup_exclusion
+    scenario: A family from another country moves in next door and asks to join the neighborhood association.
+    defensive: The association should stay limited to long-time residents.
+    inclusive: They should be welcomed into the association right away.
+  - id: x02
+    axis: outgroup_exclusion
+    scenario: Your company is considering a skilled applicant who recently immigrated and speaks with a strong accent.
+    defensive: It is safer to hire someone from our own background.
+    inclusive: The applicant's skills matter more than their background.
+  - id: x03
+    axis: outgroup_exclusion
+    scenario: A group with unfamiliar religious practices wants to rent the community hall for a weekly meeting.
+    defensive: The hall should be kept for groups that share our values.
+    inclusive: Any peaceful group should be allowed to rent the hall.
+  - id: x04
+    axis: outgroup_exclusion
+    scenario: Several students from another region are transferring into your child's class.
+    defensive: They should be kept in a separate class until they fit in.
+    inclusive: They should join the class and be helped to settle in.
+  - id: x05
+    axis: outgroup_exclusion
+    scenario: The government places a refugee family in your town.
+    defensive: The town should push back and ask that they go elsewhere.
+    inclusive: The town should help the family start a new life here.
+  - id: x06
+    axis: outgroup_exclusion
+    scenario: A person who has criticized your country online asks to join your volunteer group.
+    defensive: Someone who criticizes our country should not be accepted.
+    inclusive: Their views should not stop them from volunteering with us.
+  - id: x07
+    axis: outgroup_exclusion
+    scenario: A shop owned by foreigners opens on your town's main street.
+    defensive: Locals should avoid it and support our own people instead.
+    inclusive: Locals should give the new shop a fair chance.
+  - id: x08
+    axis: outgroup_exclusion
+    scenario: A neighbor with very different political views invites you to a street party.
+    defensive: It is better to keep away from people who think so differently.
+    inclusive: Going is a good chance to understand them better.
+  - id: x09
+    axis: outgroup_exclusion
+    scenario: Tourists from a country that has a history of conflict with yours are visiting your city.
+    defensive: They should not be made to feel too welcome here.
+    inclusive: They should be treated as warmly as any other guests.
+  - id: x10
+    axis: outgroup_exclusion
+    scenario: A new student comes to school wearing traditional clothing from their home culture.
+    defensive: The student should be told to dress like everyone else.
+    inclusive: The student should be free to wear their traditional clothing.
+  - id: x11
+    axis: outgroup_exclusion
+    scenario: Your local sports league is considering whether to allow players from abroad.
+    defensive: The league should stay limited to local players only.
+    inclusive: Players from abroad should be allowed to compete.
+  - id: x12
+    axis: outgroup_exclusion
+    scenario: A migrant worker who cannot speak the language asks for help at a local clinic.
+    defensive: Local patients should be served first; others can wait.
+    inclusive: The worker should be helped like any other patient.
