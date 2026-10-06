@@ -92,7 +92,8 @@ def cmd_analyze(cfg: dict, args) -> None:
     timings = pd.read_csv(p["timings"])
     a = cfg["analysis"]
     acfg = analysis.AnalysisConfig(
-        method=a["method"], lag=a["lag"], extra=a["extra"], pairs=[tuple(x) for x in a["pairs"]],
+        method=a["method"], pred_offset=a.get("pred_offset", 5.0), lag=a["lag"], extra=a["extra"],
+        pairs=[tuple(x) for x in a["pairs"]],
         control_category=a["control_category"], n_perm=a["n_perm"], seed=a["seed"],
         hypotheses=a.get("hypotheses", []),
         category_contrasts=[tuple(x) for x in a.get("category_contrasts", [])],
@@ -102,7 +103,7 @@ def cmd_analyze(cfg: dict, args) -> None:
     roi_idx = rois.hcp_roi_indices() if n_vertices == 20484 else rois.fake_roi_indices(n_vertices)
     meta, resp = analysis.load_responses(trials, timings, p["preds"], acfg)
     results = analysis.run_all(meta, resp, roi_idx, acfg, p["results"])
-    tc = analysis.evoked_timecourses(trials, timings, p["preds"], roi_idx)
+    tc = analysis.evoked_timecourses(trials, timings, p["preds"], roi_idx, pred_offset=acfg.pred_offset)
     tc.to_csv(p["results"] / "probe_timecourses.csv", index=False)
     (p["results"] / "analysis_config.yaml").write_text(yaml.safe_dump(dataclasses.asdict(acfg)))
     if not args.no_plots:

@@ -53,7 +53,12 @@ class AnalysisConfig:
     #   separated. Same logic as the GLM the TRIBE paper fits for language tasks.
     # "window": mean of the predicted signal in [onset + lag, offset + lag + extra].
     method: tp.Literal["glm", "window"] = "glm"
-    lag: float = 5.0  # window method only: hemodynamic delay (paper: peak ~5 s)
+    # TRIBE's predict() row t is the predicted BOLD at t + 5 s: its fMRI targets
+    # are read 5 s after the stimulus window. Adding pred_offset converts
+    # prediction times to BOLD time, where the HRF regressors and ``lag`` apply.
+    # The image pilot (notebooks/pilot_image_mortality_steering.ipynb) measures it.
+    pred_offset: float = 5.0
+    lag: float = 5.0  # window method only: BOLD delay after onset (paper: peak ~5 s)
     extra: float = 1.0  # window method only: seconds added after the segment offset
     pairs: tp.Sequence[tuple[str, str]] = DEFAULT_PAIRS
     control_category: str = "NEUT"
@@ -150,6 +155,7 @@ def load_responses(
     for path in paths:
         trial = by_trial[path.stem]
         times, preds = load_prediction(path)
+        times = times + cfg.pred_offset  # to BOLD time
         preds = (preds - mean) / std
         segs = timings[timings.trial_id == trial.trial_id]
         if cfg.method == "glm":
@@ -170,15 +176,16 @@ def load_responses(
 
 def evoked_timecourses(
     trials: list[Trial], timings: pd.DataFrame, pred_dir: str | Path, rois: dict[str, np.ndarray],
-    kind: str = "probe", window: tuple[float, float] = (-2, 16),
+    kind: str = "probe", window: tuple[float, float] = (-2, 16), pred_offset: float = 5.0,
 ) -> pd.DataFrame:
-    """ROI time courses locked to segment onsets (raw units). Use it to check
-    that ``AnalysisConfig.lag`` sits on the peak of the predicted response."""
+    """ROI time courses locked to segment onsets (raw units, BOLD time). Use it
+    to check that ``AnalysisConfig.lag`` sits on the peak of the predicted response."""
     pred_dir = Path(pred_dir)
     rows = []
     lags = np.arange(window[0], window[1] + 1)
     for trial in trials:
         times, preds = load_prediction(pred_dir / f"{trial.trial_id}.npz")
+        times = times + pred_offset  # to BOLD time
         roi_ts = roi_means(preds, rois)
         segs = timings[(timings.trial_id == trial.trial_id) & (timings.kind == kind)]
         for seg in segs.itertuples():

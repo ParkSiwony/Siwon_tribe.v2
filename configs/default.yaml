@@ -25,6 +25,7 @@ model:
 
 analysis:
   method: glm                    # glm (recommended) or window
+  pred_offset: 5.0               # TRIBE predict() row t = BOLD at t + 5 s; the image pilot measures this
   lag: 5.0                       # window method only; check results/figures/probe_timecourses.png
   extra: 1.0
   control_category: NEUT

@@ -68,12 +68,15 @@ class FakePredictor:
       * every MS prime additionally activates the ``salience`` ROI, and
       * WV_NORM probes that follow an MS prime additionally activate ``vmPFC``.
     A correct analysis pipeline must recover exactly these two effects.
+
+    Like TRIBE, the output is stimulus-locked: row t is the BOLD signal at
+    t + ``pred_offset`` seconds.
     """
 
     def __init__(self, n_vertices: int, roi_indices: dict[str, np.ndarray], effect: float = 1.0,
-                 noise: float = 0.3, seed: int = 0):
+                 noise: float = 0.3, seed: int = 0, pred_offset: int = 5):
         self.n_vertices, self.rois, self.effect, self.noise = n_vertices, roi_indices, effect, noise
-        self.seed = seed
+        self.seed, self.pred_offset = seed, pred_offset
         self._patterns: dict[str, np.ndarray] = {}
 
     def _pattern(self, key: str) -> np.ndarray:
@@ -84,9 +87,10 @@ class FakePredictor:
 
     def predict(self, wav_path, trial, timings):
         n_tr = int(np.ceil(timings.onset.iloc[-1] + timings.duration.iloc[-1] + trial.tail))
-        drive = np.zeros((n_tr, self.n_vertices))
+        n_bold = n_tr + self.pred_offset  # BOLD is simulated a little past the end, then shifted
+        drive = np.zeros((n_bold, self.n_vertices))
         for row in timings.itertuples():
-            box = np.zeros(n_tr)
+            box = np.zeros(n_bold)
             box[int(row.onset) : int(np.ceil(row.onset + row.duration))] = 1.0
             pattern = self._pattern(row.category).copy()
             if row.kind == "prime" and trial.prime_cond == "MS":
@@ -95,10 +99,11 @@ class FakePredictor:
                 pattern[self.rois["vmPFC"]] += self.effect
             drive += box[:, None] * pattern[None, :]
         h = hrf()
-        bold = np.apply_along_axis(lambda x: np.convolve(x, h)[:n_tr], 0, drive)
+        bold = np.apply_along_axis(lambda x: np.convolve(x, h)[:n_bold], 0, drive)
         rng = np.random.default_rng(_seed(self.seed, trial.trial_id))
         bold += self.noise * rng.normal(size=bold.shape)
-        return np.arange(n_tr, dtype=float), bold.astype(np.float32)
+        preds = bold[self.pred_offset: self.pred_offset + n_tr]  # row t = BOLD at t + offset
+        return np.arange(n_tr, dtype=float), preds.astype(np.float32)
 
 
 def save_prediction(path: Path, times: np.ndarray, preds: np.ndarray, dtype: str = "float16") -> None:
