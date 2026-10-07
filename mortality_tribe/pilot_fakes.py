@@ -105,7 +105,7 @@ class FakeTribe:
         self._visual = np.random.default_rng(seed + 1).normal(size=(16 * 16 * 3, n_vertices)) / 30
         feat = types.SimpleNamespace(layers=[0.5, 0.75, 1.0], layer_aggregation="group_mean",
                                      model_name=str(config_dir), batch_size=1, model=base, tokenizer=tok)
-        self.data = types.SimpleNamespace(text_feature=feat, get_loaders=self._get_loaders)
+        self.data = types.SimpleNamespace(text_feature=feat, get_loaders=self._get_loaders, TR=1.0)
 
     # -- text ----------------------------------------------------------------
     def _text_tensor(self, words: pd.DataFrame, n_bins: int = 200):
@@ -168,18 +168,31 @@ class FakeTribe:
         return (kernel @ drive).astype(np.float32)
 
 
-def simple_text_events(passages: dict[str, str], words_per_second: float = 2.5) -> pd.DataFrame:
-    """Word events with a left context, without neuralset (dry run only)."""
-    rows = []
-    for name, text in passages.items():
-        t, seen = 0.5, []
-        for word in text.split():
-            seen.append(word)
-            rows.append(dict(type="Word", text=word, start=t, duration=0.3, timeline=name, subject="default",
-                             context=" ".join(seen[-1024:])))
-            t += 1.0 / words_per_second
-    return pd.DataFrame(rows)
-
-
 def corpus_for(*texts: tp.Iterable[str]) -> str:
     return " ".join(" ".join(t) for t in texts)
+
+
+def write_dry_pairs(folder: str | Path, n_families: int = 3, per_family: int = 4) -> Path:
+    """Tiny synthetic contrast-pair files in the steering study's format (dry run only)."""
+    import json
+
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    templates = {
+        "mort_self": ("Nothing I do now can bring this moment back.", "I can return to this moment whenever I like."),
+        "mort_struct": ("The old bridge is gone and will never stand again.", "The old bridge is closed and will open again."),
+        "neg_sensory": ("The room smells of burnt rubber and sour milk.", "The room smells of fresh bread and coffee."),
+        "neg_affect": ("A heavy sadness settles over the whole evening.", "A light calm settles over the whole evening."),
+        "def": ("The newcomers should be kept out of the club.", "The newcomers should be welcomed into the club."),
+    }
+    for name, (pos, neg) in templates.items():
+        with open(folder / f"{name}_pairs.jsonl", "w", encoding="utf-8") as f:
+            for fam in range(n_families):
+                for k in range(per_family):
+                    rec = dict(id=f"{name}_{fam}_{k}", family=f"family{fam}", gen=("gpt", "kimi")[k % 2],
+                               context=f"Situation {fam} {k}.", question="Which statement fits better?",
+                               opt_pos=pos, opt_neg=neg)
+                    if name == "def":
+                        rec["axis"] = ("ingroup_norm", "outgroup_exclusion")[fam % 2]
+                    f.write(json.dumps(rec) + "\n")
+    return folder

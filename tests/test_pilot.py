@@ -43,7 +43,7 @@ def procedural(tmp_path_factory):
 
 def test_procedural_pairs_are_complete(procedural):
     manifest, _ = procedural
-    assert set(manifest.cond) == {"MS", "LT"}
+    assert set(manifest.cond) == {"MS", "LT", "NEG"}
     roles = manifest.groupby("pair_id").role.apply(set)
     assert all(r == {"target", "control"} for r in roles)
 
@@ -60,7 +60,7 @@ def test_lowlevel_stats(procedural):
     stats = pi.lowlevel_stats(manifest)
     assert np.isfinite(stats[["luminance", "contrast", "edges", "colourfulness"]].to_numpy()).all()
     tests = pi.paired_lowlevel_tests(stats)
-    assert set(tests.cond) == {"MS", "LT"} and len(tests) == 8
+    assert set(tests.cond) == {"MS", "LT", "NEG"} and len(tests) == 12
 
 
 def test_make_image_video(procedural, tmp_path):
@@ -111,6 +111,18 @@ def test_peak_lag_and_maps():
     d = pi.pair_differences(maps, manifest)
     assert pb.cosine(d["MS"][1].mean(0), meaning["MS"]) > 0.9
     assert pi.suggested_pred_offset(2.0, show=3.0) == pytest.approx(4.5)
+
+
+def test_permutation_p_values_respect_the_number_of_sign_patterns():
+    rng = np.random.default_rng(3)
+    effect = rng.normal(size=300)
+    # strong and consistent, in float32 like TRIBE's predictions
+    d = (effect + rng.normal(0, 0.1, (4, 300))).astype(np.float32)
+    # 4 pairs = 16 sign patterns; all-plus and all-minus both reach the observed norm
+    assert pi.contrast_reliability_null(d)["p_perm"] == pytest.approx(2 / 16)
+    assert pi.compare_contrasts(d, d[::-1], n_perm=200)["p_perm"] >= 1 / 200
+    big = (effect + rng.normal(0, 0.1, (20, 300))).astype(np.float32)
+    assert pi.contrast_reliability_null(big, n_perm=300)["p_perm"] == pytest.approx(1 / 300)
 
 
 def test_compare_contrasts_detects_shared_meaning():

@@ -10,8 +10,9 @@ ROOT = Path(__file__).parents[1]
 NOTEBOOK = ROOT / "notebooks" / "pilot_image_mortality_steering.ipynb"
 
 # Smaller settings so the rehearsal takes seconds, not minutes.
-FAST = dict(SEEDS=(0,), PRESENTATION=dict(lead=3.0, show=2.0, tail=5.0, fps=8), INVERSION_STEPS=25,
-            N_NULL_TARGETS=1, EPS_LIST=[-0.1, 0.1], MAX_NEW_TOKENS=6)
+FAST = dict(SEEDS=(0,), PRESENTATION=dict(lead=3.0, show=2.0, tail=5.0, fps=8), INVERSION_STEPS=20,
+            N_NULL_TARGETS=1, EPS_LIST=[-0.1, 0.1], MAX_NEW_TOKENS=6, TEXT_PAIRS_PER_SET=2, CAA_MAX_PAIRS=6,
+            ITEMS_MAX=6)
 
 
 def test_notebook_runs_in_dry_run_mode(monkeypatch, tmp_path):
@@ -29,11 +30,17 @@ def test_notebook_runs_in_dry_run_mode(monkeypatch, tmp_path):
         if i == 0:  # configuration cell
             assert ns["DRY_RUN"] is True
             ns.update(FAST, QUESTIONS=ns["QUESTIONS"][:1], OUT=tmp_path, IMAGE_DIR=tmp_path / "images")
-    assert set(ns["VECTORS"]) == {"u_MS", "u_LT", "u_null", "u_rand"}
-    assert set(ns["summary"].vector) == {"u_MS", "u_LT", "u_null", "u_rand"}
+    # A: the gate ran on real sentence pairs and image pairs and made a decision
+    assert ns["recommended"] in {"text", "image", "both", "caa_only"}
+    assert {"finality|text", "negative|text", "finality|image", "negative|image"} <= set(ns["contrasts"])
+    # C: brain-route and sentence-pair vectors in one space
+    assert {"u_text_self", "u_MS", "u_LT", "u_null", "u_rand", "v_mort_self", "v_mort_self_clean",
+            "v_def_norm", "v_def_excl"} <= set(ns["VECTORS"])
+    assert {"r_text_self", "r_MS", "r_LT"} <= set(ns["closed"].columns)
+    # D: steering on the user's items and chat
+    assert set(ns["summary"].vector) == set(ns["STEER_VECTORS"])
     assert set(ns["summary"].axis) == {"ingroup_norm", "outgroup_exclusion"}
-    assert len(ns["chat"]) == 1 + 2 * 3  # unsteered + 3 vectors x (+eps, -eps)
-    assert {"r_MS", "r_LT"} <= set(ns["closed"].columns)
-    for name in ("manifest.csv", "image_maps.npy", "contrasts.npz", "vectors.npz", "defense_summary.csv",
-                 "chat_demo.csv"):
+    assert len(ns["chat"]) == len(ns["QUESTIONS"]) * (1 + 2 * len(ns["CHAT_VECTORS"]))
+    for name in ("manifest.csv", "image_maps.npy", "text_maps.npy", "text_index.csv", "contrasts.npz",
+                 "vectors.npz", "caa_quality.csv", "defense_summary.csv", "chat_demo.csv"):
         assert (tmp_path / name).exists(), name

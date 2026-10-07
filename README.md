@@ -109,30 +109,37 @@ The default design has 8 primes × 4 items × 2 delays = 64 trials, about 4 hour
 Start with `outputs/results/summary.md`. Next, check `figures/probe_timecourses.png`
 to confirm the predicted responses look hemodynamically sensible.
 
-## Pilot: images → predicted brain → Llama steering
+## Pilot: text vs image → predicted brain → Llama steering
 
-`notebooks/pilot_image_mortality_steering.ipynb` has one cell per step:
+`notebooks/pilot_image_mortality_steering.ipynb` uses the steering study's contrast sentences (`steering_sentences/`) and generated image pairs.
 
-1. **Images to TRIBE.** Generates matched image pairs with SDXL-Turbo:
-   - mortality salience (MS): a coffin vs a storage chest, a gravestone vs a bench, …;
-   - limited time (LT): an hourglass running out vs just turned, a candle stub vs a tall candle, ….
+**A. Gate: which modality?**
+- TRIBE predicts the brain response to the contrast sentences (`context` + `opt_pos` vs `context` + `opt_neg`) and to matched image pairs:
+  - mortality (MS): a coffin vs a storage chest, …;
+  - limited time (LT): an hourglass running out vs just turned, …;
+  - negative affect (NEG): moldy vs fresh bread, ….
+- Finality and negative-affect contrasts are compared across text and image in brain space (multitrait-multimethod).
+- A rule fixed in advance recommends steering from text, image, both, or the direct sentence vectors only.
 
-   It then predicts the brain response to each image and compares the meaning contrasts (MS − control vs LT − control). The comparison uses sign-flip nulls, a split-half reliability ceiling and ROI tables, and also measures TRIBE's response lag.
-2. **Brain map → Llama direction.** A cortical map cannot be added to Llama. Instead, gradient search through TRIBE's frozen text pathway finds the Llama-3.2-3B residual-stream direction whose effect on the predicted cortex best matches each image contrast.
-   - The result is compared against directions fitted to sign-flipped (meaningless) contrasts.
-   - A closed-loop check then steers TRIBE's own Llama with the direction.
-3. **Steering Llama.** Asks the in-group-norm / out-group-exclusion items (letters counterbalanced; 12 + 12 English sample items, or load the steering study's file) and open questions about humanity, at ±ε, against null and random directions of the same norm.
+**B. Mortality vs limited time.** Similarity of the MS and LT image contrasts, with sign-flip nulls, reliability ceilings, ROI tables and cortical maps.
+
+**C. Vectors.**
+- Each brain contrast becomes a Llama-3.2-3B residual-stream direction through TRIBE's text pathway: a gradient search through frozen TRIBE, with null directions and a closed loop that steers TRIBE's own Llama.
+- Direct contrast-pair (CAA) vectors are built from the sentences with the steering study's method: both letter orders, family holdout, split-half, GPT-vs-Kimi agreement, and orthogonalisation against `neg_sensory`, `neg_affect`, `def_norm` and `def_excl`.
+- The brain route is valid only if `u_text_self` points the same way as `v_mort_self`.
+
+**D. Steering.** The 408 items (`steering_sentences/items.jsonl`, letters counterbalanced) and open questions about humanity, at ±ε, against `u_null`, `u_rand` and `v_arb`.
 
 ```bash
 pip install -e ".[tribe,plot,pilot]"
-PILOT_DRY_RUN=1 jupyter nbconvert --to notebook --execute notebooks/pilot_image_mortality_steering.ipynb  # CPU rehearsal, ~1 min
+PILOT_DRY_RUN=1 jupyter nbconvert --to notebook --execute notebooks/pilot_image_mortality_steering.ipynb  # CPU rehearsal, a few min
 jupyter lab notebooks/pilot_image_mortality_steering.ipynb                                                # the real run (GPU >= 16 GB)
 ```
 
 On Windows, set `DRY_RUN = True` in the first cell instead of the environment variable.
-The real run takes about 1–1.5 h on an RTX A4000, most of it in TRIBE's fp32 Llama feature
-extraction and the closed loop (`RUN_CLOSED_LOOP = False` saves ~15–20 min). SDXL-Turbo's
-licence allows non-commercial research use.
+The real run takes about 1.5–2 h on an RTX A4000. Most of it goes to TRIBE's fp32 Llama
+feature extraction, the steering sweep over 408 items, and the closed loop
+(`RUN_CLOSED_LOOP = False` saves ~15 min). SDXL-Turbo's licence allows non-commercial research use.
 
 ## Layout
 
@@ -146,12 +153,16 @@ mortality_tribe/
   analysis.py       GLM betas, paired permutation tests, interaction, carry-over, decoding
   rois.py           hypothesis ROIs on HCP-MMP
   plotting.py       surface maps, ROI bars, onset-locked time courses
-  pilot_images.py   pilot step 1: image pairs, videos, TRIBE image responses, MS-vs-LT similarity
-  pilot_bridge.py   pilot step 2: brain map -> Llama direction (inversion through TRIBE), closed loop
-  pilot_steer.py    pilot step 3: steering hooks, defense items (A/B counterbalanced), chat demo
+  pilot_images.py   image pairs (MS, LT, NEG), videos, TRIBE image responses, contrast statistics
+  pilot_text.py     text -> brain: TRIBE responses to contrast sentences, pos - neg maps
+  pilot_gate.py     text-vs-image multitrait-multimethod check and the modality decision
+  pilot_bridge.py   brain map -> Llama direction (inversion through TRIBE), closed loop
+  caa.py            contrast-pair loading, text checks, CAA vectors with the steering study's method
+  pilot_steer.py    steering hooks, defense items (A/B counterbalanced), chat demo
   pilot_fakes.py    fake TRIBE + tiny Llama for the notebook's DRY_RUN
 notebooks/          pilot_image_mortality_steering.ipynb
-tests/              design invariants, recovery of planted effects, pilot steps, notebook dry run
+steering_sentences/ ChatGPT/Kimi contrast pairs and items from the steering study (see its README)
+tests/              design invariants, planted-effect recovery, pilot steps, CAA, modality gate, notebook dry run
 ```
 
 ## Design decisions found by the dry run

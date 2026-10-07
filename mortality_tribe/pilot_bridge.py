@@ -83,13 +83,10 @@ def injection_layer(groups: list[tuple[int, int]]) -> int:
 
 
 def text_events(passages: dict[str, str], words_per_second: float = 2.5, word_duration: float = 0.3,
-                sentence_gap: float = 0.5, language: str = "english") -> pd.DataFrame:
+                sentence_gap: float = 0.5, language: str = "english", use_neuralset: bool = True) -> pd.DataFrame:
     """Word events with synthetic timings, one timeline per passage, then the
     same text transforms TRIBE's demo applies after transcription
     (sentences, 1,024-word left context)."""
-    from neuralset.events.transforms import AddContextToWords, AddSentenceToWords, AddText, RemoveMissing
-    from neuralset.events.utils import standardize_events
-
     rows = []
     for name, text in passages.items():
         t = 0.5
@@ -97,7 +94,25 @@ def text_events(passages: dict[str, str], words_per_second: float = 2.5, word_du
             rows.append(dict(type="Word", text=word, start=t, duration=word_duration, timeline=name,
                              subject="default", language=language))
             t += 1.0 / words_per_second + (sentence_gap if word.endswith((".", "!", "?")) else 0.0)
-    events = standardize_events(pd.DataFrame(rows))
+    return finish_text_events(pd.DataFrame(rows), use_neuralset)
+
+
+def finish_text_events(words: pd.DataFrame, use_neuralset: bool = True) -> pd.DataFrame:
+    """Add sentences and left context to raw word rows.
+
+    ``use_neuralset=True`` runs TRIBE's own transforms (spaCy sentences, up to
+    1,024 words of context); ``False`` uses the preceding words of the
+    timeline as context (dry runs, no spaCy needed).
+    """
+    if not use_neuralset:
+        words = words.copy()
+        words["context"] = words.groupby("timeline", sort=False).text.transform(
+            lambda s: [" ".join(s.iloc[max(0, i - 1023): i + 1]) for i in range(len(s))])
+        return words
+    from neuralset.events.transforms import AddContextToWords, AddSentenceToWords, AddText, RemoveMissing
+    from neuralset.events.utils import standardize_events
+
+    events = standardize_events(words)
     for transform in (AddText(), AddSentenceToWords(max_unmatched_ratio=0.05),
                       AddContextToWords(sentence_only=False, max_context_len=1024, split_field=""),
                       RemoveMissing()):
@@ -213,7 +228,7 @@ def invert_brain_map(model, batches, target: np.ndarray, mask: np.ndarray | None
             opt.step()
             history.append(float(r.detach()))
             if verbose and (step % 50 == 0 or step == n_steps - 1):
-                LOGGER.info("inversion step %d: r = %.3f", step, float(r))
+                LOGGER.info("inversion step %d: r = %.3f", step, history[-1])
     with torch.no_grad():
         u = scale * p / p.norm()
         delta = steered_delta(model, batches, base_outs, u).cpu().numpy()

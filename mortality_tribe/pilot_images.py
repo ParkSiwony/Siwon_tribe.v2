@@ -63,6 +63,22 @@ PAIR_PROMPTS: dict[str, list[tuple[str, str, str]]] = {
         ("battery", "a phone screen showing a nearly empty red battery icon, close-up photograph",
          "a phone screen showing a full green battery icon, close-up photograph"),
     ],
+    # Negative-affect control (sensory unpleasantness, nothing final): the image
+    # counterpart of the neg_sensory sentence pairs, for the text-vs-image gate.
+    "NEG": [
+        ("bread", "a slice of bread covered in green and grey mold on a plate, photograph",
+         "a fresh slice of bread on a plate, photograph"),
+        ("fruit", "rotten brown apples with soft dark spots in a bowl, photograph",
+         "fresh shiny red apples in a bowl, photograph"),
+        ("sink", "a dirty kitchen sink full of greasy dishes and food scraps, photograph",
+         "a clean empty kitchen sink, photograph"),
+        ("milk", "a glass of spoiled curdled milk with lumps, photograph",
+         "a glass of fresh smooth milk, photograph"),
+        ("trash", "an overflowing trash bin with garbage spilling onto the floor, photograph",
+         "an empty trash bin on a clean floor, photograph"),
+        ("toilet", "a filthy stained public toilet, photograph",
+         "a clean white public toilet, photograph"),
+    ],
 }
 
 
@@ -177,8 +193,23 @@ def draw_pairs_procedural(out_dir: str | Path, size: int = 256, seeds: tp.Sequen
             if target and (i, j) != (4, 4):
                 d.line([x0 * s + dx, y0 * s + dy, (x0 + 24) * s + dx, (y0 + 22) * s + dy], fill=(200, 30, 30), width=int(3 * s))
 
+    def apple(d, dx, dy, target):
+        d.ellipse([78 * s + dx, 78 * s + dy, 178 * s + dx, 178 * s + dy],
+                  fill=(120, 85, 40) if target else (200, 30, 40))
+        if target:  # rot spots
+            for x, y in ((100, 110), (140, 125), (118, 150)):
+                d.ellipse([x * s + dx, y * s + dy, (x + 18) * s + dx, (y + 14) * s + dy], fill=(60, 45, 25))
+
+    def bread(d, dx, dy, target):
+        d.rounded_rectangle([70 * s + dx, 70 * s + dy, 186 * s + dx, 190 * s + dy], radius=int(20 * s),
+                            fill=(225, 190, 130), outline=(150, 110, 60))
+        if target:  # mould
+            for x, y in ((90, 95), (130, 140), (150, 90)):
+                d.ellipse([x * s + dx, y * s + dy, (x + 26) * s + dx, (y + 20) * s + dy], fill=(110, 140, 100))
+
     families = {"MS": [("grave", grave), ("coffin", coffin)],
-                "LT": [("hourglass", hourglass), ("candle", candle), ("calendar", calendar)]}
+                "LT": [("hourglass", hourglass), ("candle", candle), ("calendar", calendar)],
+                "NEG": [("apple", apple), ("bread", bread)]}
     rows = []
     for cond, fams in families.items():
         for family, draw in fams:
@@ -389,8 +420,8 @@ def compare_contrasts(d_a: np.ndarray, d_b: np.ndarray, mask: np.ndarray | None 
       ``r`` cannot meaningfully exceed sqrt(rel_a * rel_b).
     * ``r_disatt``: r corrected for that ceiling; unstable when reliabilities are low.
     """
-    if mask is not None:
-        d_a, d_b = d_a[:, mask], d_b[:, mask]
+    # float64: TRIBE predicts float32, and the Gram route below must reproduce r exactly
+    d_a, d_b = (np.asarray(d if mask is None else d[:, mask], dtype=np.float64) for d in (d_a, d_b))
     r = _corr(d_a.mean(0), d_b.mean(0))
     # Correlations of sign-flipped means only need the pair x pair Gram
     # matrices of the vertex-centred differences (exact, and tiny in memory).
@@ -399,6 +430,7 @@ def compare_contrasts(d_a: np.ndarray, d_b: np.ndarray, mask: np.ndarray | None 
     rng = np.random.default_rng(seed)
     sa = rng.choice([-1.0, 1.0], size=(n_perm, len(d_a)))
     sb = rng.choice([-1.0, 1.0], size=(n_perm, len(d_b)))
+    sa[0] = sb[0] = 1.0  # the observed pattern counts, so p >= 1 / n_perm (as in analysis.sign_flip_test)
     num = np.einsum("ki,ij,kj->k", sa, g_ab, sb)
     den = np.sqrt(np.einsum("ki,ij,kj->k", sa, g_aa, sa) * np.einsum("ki,ij,kj->k", sb, g_bb, sb))
     null = num / (den + 1e-12)
@@ -424,13 +456,14 @@ def contrast_reliability_null(d: np.ndarray, mask: np.ndarray | None = None, n_p
     Sign-flip test on the norm of the mean map: under the null the mean map is
     as large as a randomly signed average of the same pair differences.
     """
-    if mask is not None:
-        d = d[:, mask]
+    # float64, or rounding drops the observed pattern from its own null (p = 0 with 4 pairs)
+    d = np.asarray(d if mask is None else d[:, mask], dtype=np.float64)
     obs = np.linalg.norm(d.mean(0))
-    if len(d) <= 12:  # exact: every sign pattern
+    if len(d) <= 12:  # exact: every sign pattern; all-flipped equals the observed, so p >= 2 / 2**n
         signs = np.array(list(itertools.product([1.0, -1.0], repeat=len(d))))
     else:
         signs = np.random.default_rng(seed).choice([-1.0, 1.0], size=(n_perm, len(d)))
+        signs[0] = 1.0
     gram = d @ d.T  # |s.d / n|^2 = s G s / n^2: no [n_patterns x n_vertices] matrix needed
     null = np.sqrt(np.maximum(np.einsum("ki,ij,kj->k", signs, gram, signs), 0)) / len(d)
     return dict(norm=float(obs), p_perm=float((null >= obs * (1 - 1e-9)).mean()))
