@@ -26,7 +26,7 @@ def plot_maps(map_dir: str | Path, out_dir: str | Path, pattern: str = "*.npy") 
             continue  # fake / non-fsaverage5 data
         vmax = np.percentile(np.abs(vec), 99) or 1.0
         plotter.plot_surf(  # creates its own figure and returns the colour mappable
-            vec, views=["left", "right", "medial_left", "medial_right"], cmap="cold_hot",
+            vec, views=["left", "right", "medial_left", "medial_right"], cmap="coolwarm",
             vmin=-vmax, vmax=vmax, symmetric_cbar=True, colorbar=True,
         )
         fig = plt.gcf()
